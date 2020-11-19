@@ -494,7 +494,7 @@ namespace ls {
 
                 while (first != last) // Itera pela lista até que o iterator first seja igual ao iterator last
                     {
-                        DNode * itr{first}; // Nó que vai ser apagado
+                        DNode * itr{&first}; // Nó que vai ser apagado
                         DNode * prev{(*itr).prev}; // Nó posterior ao itr
                         DNode * next{(*itr).next}; // Nó anterior ao itr
 
@@ -608,7 +608,17 @@ namespace ls {
 
         void print () 
         {
+            std::cout << "[ ";
+            DNode * temp { m_head->next };
 
+            while (temp != m_tail)
+            {
+                std::cout << temp->data << " ";
+                temp = temp->next;
+            }
+
+            std::cout << "]";
+            return;
         }
 
 

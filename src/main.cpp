@@ -34,7 +34,12 @@ int main () {
 
     it = myList.back();
 
-    std::cout << "\nUltimo elemento: " << it;
+    std::cout << "\nUltimo elemento: " << it  << "\n";
+
+    myList.print();
+
+    
+
 
 
 
