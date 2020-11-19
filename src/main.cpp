@@ -3,6 +3,7 @@
 int main () {
     ls::list<int> exemplo( {1, 2, 3, 4} );
     ls::list<int> myList = {1, 2, 3, 4, 5};
+    ls::list<int> myList2(3);
 
     myList.assign( {1, 2, 3} );
 
@@ -38,8 +39,19 @@ int main () {
 
     myList.print();
 
-    
+    myList2.print();
 
+    --y;
+    auto b = myList2.begin();
+    auto e = myList2.end();
+
+    myList.insert(y, b, e);
+
+    myList.print();
+
+    if(myList == myList2) {
+        std::cout << "As listas sao iguais\n";
+    } else { std::cout << "As listas sao diferentes\n";}
 
 
 

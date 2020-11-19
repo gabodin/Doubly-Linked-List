@@ -409,6 +409,7 @@ namespace ls {
                     insert(pos, (*first).data);
                     ++first;
                  }
+                return pos;
             }
 
             iterator insert( iterator & pos, iterator & first, iterator & last )  
@@ -418,6 +419,7 @@ namespace ls {
                     insert(pos, (*first).data);
                     ++first;
                  }
+                return pos;
             }
 
             iterator insert( const_iterator & pos, const_iterator & first, const_iterator & last )  
@@ -427,6 +429,7 @@ namespace ls {
                     insert(pos, (*first).data);
                     ++first;
                  }
+                return pos;
             }
 
             iterator insert( const_iterator & pos, iterator & first, iterator & last )  
@@ -436,6 +439,7 @@ namespace ls {
                     insert(pos, (*first).data);
                     ++first;
                  }
+                return pos;
             }
 
             const_iterator insert(const const_iterator & pos, const std::initializer_list<T>  & ilist ) 
@@ -446,7 +450,8 @@ namespace ls {
                 {
                     insert(pos, *itr); // Insere um nó na posição anterior a pos   
                     ++itr; // Avança uma posição na lista inicializadora
-                } 
+                }
+                return pos; 
             }
 
             iterator insert( iterator & pos, const std::initializer_list<T>  & ilist ) 
@@ -458,6 +463,7 @@ namespace ls {
                     insert(pos, *itr); // Insere um nó na posição anterior a pos   
                     ++itr; // Avança uma posição na lista inicializadora
                  } 
+                return pos;
             }
 
             const_iterator erase( const_iterator itr ) 
@@ -537,11 +543,11 @@ namespace ls {
             {
                 if(this->size() != rhs.size()) return false; // Se elas têm tamanhos diferentes, retorna falso
 
-                auto itr1 = this->begin;
-                auto itr2 = rhs.begin();
+                iterator itr1 = this->begin();
+                iterator itr2 = rhs.begin();
 
                 while (itr1 != this->end()) {
-                    if( *itr1 != *itr2 ) return false; // Se o conteúdo de um iterator é diferente do outro, retorna falso
+                    if( itr1 != itr2 ) return false; // Se o conteúdo de um iterator é diferente do outro, retorna falso
                     ++itr1;
                     ++itr2;
                 }
@@ -549,15 +555,15 @@ namespace ls {
                 return true; // Caso as listas tenham o mesmo tamanho e seus nós sejam todos iguais, retorna verdadeiro
             }
 
-            bool operator!= (const list& rhs) //Sobrecarga do operador == para verificar se duas listas são diferentes
+            bool operator!= ( list& rhs) //Sobrecarga do operador == para verificar se duas listas são diferentes
             {
                 if(this->size() != rhs.size()) return true; // Se elas têm tamanhos diferentes, retorna verdadeiro
 
-                auto itr1 = this->begin();
-                auto itr2 = rhs.begin();
+                iterator itr1 = this->begin();
+                iterator itr2 = rhs.begin();
 
-                while (itr1 != this->end() && itr2 != rhs.end()) {
-                    if( *itr1 != *itr2 ) return true; // Se o conteúdo de um iterator é diferente do outro, retorna verdadeiro
+                while (itr1 != this->end()) {
+                    if( itr1 != itr2 ) return true; // Se o conteúdo de um iterator é diferente do outro, retorna verdadeiro
                     ++itr1;
                     ++itr2;
                 }
@@ -617,7 +623,7 @@ namespace ls {
                 temp = temp->next;
             }
 
-            std::cout << "]";
+            std::cout << "]\n";
             return;
         }
 
