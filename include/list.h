@@ -4,6 +4,7 @@
 #include <iostream>
 #include <initializer_list>
 #include <iterator>
+#include <stdexcept>
 
 using size_t = unsigned int;
 
@@ -35,7 +36,7 @@ namespace ls {
                     {}
                     
                     ~const_iterator ( void ) = default;
-                    const_iterator (const const_iterator & ) = default;
+                    const_iterator (const const_iterator&  ) = default;
 
                     const_iterator & operator=( const const_iterator& ) = default;
                     const DNode & operator* (void) { return *m_ptr; }
@@ -59,10 +60,10 @@ namespace ls {
                     { }
                                         
                     ~iterator ( void ) = default;
-                    iterator ( const iterator & ) = default;
+                    iterator ( const iterator& ) = default;
 
                     iterator& operator=( const iterator& ) = default;
-                    DNode & operator* (void) { return *m_ptr; }
+                    DNode & operator*(void) { return *m_ptr; }
                     DNode * operator&(void) const { return m_ptr; }
 
                     iterator & operator++ (void) { m_ptr = m_ptr->next; return *this; } // ++it
@@ -123,8 +124,8 @@ namespace ls {
                 }
             }
 
-            template< typename InputIt >  // Constrói a lista com os conteúdos no intervalo [first, last]
-            list( InputIt first, InputIt last ) : list() 
+            // Constrói a lista com os conteúdos no intervalo [first, last]
+            list( const_iterator first, const_iterator last ) : list() 
             {   
 
                 while ( first != last ) 
@@ -134,9 +135,20 @@ namespace ls {
                  }
             }
 
-            list( const list& other ) : list() // Copy constructor
+            // Constrói a lista com os conteúdos no intervalo [first, last]
+            list( iterator first, iterator last ) : list() 
             {   
-                auto itr = other.begin();
+
+                while ( first != last ) 
+                 {
+                    push_back((*first).data);
+                    ++first;
+                 }
+            }
+
+            list( list & other ) : list() // Copy constructor
+            {   
+                iterator itr = other.begin();
                 while ( itr != other.end()) 
                  {
                     push_back((*itr).data);
@@ -205,57 +217,33 @@ namespace ls {
                 }
 
             }
+            // Nas funções seguintes, front e back, espera-se que o usuário não chame o método com uma lista vazia
 
             T & front() // Retorna o atributo data do primeiro nó da lista
             {
-                if(this->empty()) 
-                {
-                    return nullptr;                   
-                } 
-                else 
-                {
-                    DNode * temp = m_head->next;
-                    return temp->data;
-                }
+                DNode * temp = m_head->next;
+                return temp->data;
+                
             }
 
             const T & front( ) const // Retorna o atributo data do primeiro nó da lista
             {
-                if(this->empty()) 
-                {
-                    return nullptr;                   
-                } 
-                else 
-                {
-                    DNode * temp = m_head->next;
-                    return temp->data;
-                }
+                DNode * temp = m_head->next;
+                return temp->data;                
             }
 
             T & back( ) // Retorna o atributo data do último nó da lista
             {
-                if(this->empty()) 
-                {
-                    return nullptr;                   
-                } 
-                else 
-                {
-                    DNode * temp = m_tail->prev;
-                    return temp->data;
-                }  
+                DNode * temp = m_tail->prev;
+                return temp->data;                 
             }
             
             const T & back( ) const // Retorna o atributo data do último nó da lista
             {
-                if(this->empty()) 
-                {
-                    return nullptr;                   
-                } 
-                else 
-                {
-                    DNode * temp = m_tail->prev;
-                    return temp->data;
-                }  
+ 
+                DNode * temp = m_tail->prev;
+                return temp->data;
+
             }
 
             void push_front( const T & value ) { // Adiciona um nó na primeira posição da lista
@@ -337,8 +325,21 @@ namespace ls {
 
             }
 
-            template < class InItr >
-            void assign(const InItr first, const InItr last ) 
+            
+            void assign( iterator first, iterator last ) 
+            {             
+                if(first == nullptr || last == nullptr) return;//Se first ou last apontarem para nullptr, retorna-se nulo
+
+                this->clear(); // Apaga o conteúdo anterior da lista 
+
+                while (first != last) // Enquanto first for diferente de last, cópias do conteúdo de first são adicionadas à lista
+                {
+                    push_back(*first);
+                    ++first;
+                }
+            }
+
+            void assign( const_iterator first, const_iterator last ) 
             {             
                 if(first == nullptr || last == nullptr) return;//Se first ou last apontarem para nullptr, retorna-se nulo
 
@@ -365,17 +366,17 @@ namespace ls {
             {
                 if(itr == nullptr) return nullptr;
 
-                DNode * prev{(*itr).prev};
+                DNode * prev{(&itr).prev};
 
                 DNode * temp = new DNode(value);
 
                 // Conecta o nó adicionado ao antecessor de itr e a itr, respectivamente
                 temp->prev = prev; 
-                temp->next = itr;
+                temp->next = &itr;
 
                 // Conecta o nó anterior a itr ao novo nó e conecta itr ao novo nó
                 prev->next = temp;
-                (*itr).prev = temp;
+                (&itr).prev = temp;
 
                 return temp; // Retorna o endereço do nó adicionado
 
@@ -391,7 +392,7 @@ namespace ls {
 
                 // Conecta o nó adicionado ao antecessor de itr e a itr, respectivamente
                 temp->prev = prev; 
-                temp->next = itr;
+                temp->next = &itr;
 
                 // Conecta o nó anterior a itr ao novo nó e conecta itr ao novo nó
                 prev->next = temp;
@@ -400,8 +401,8 @@ namespace ls {
                 return temp; // Retorna o endereço do nó adicionado
             }
 
-            template < typename InItr >
-            iterator insert(const  iterator & pos, const InItr & first, const InItr & last )  
+            
+            iterator insert( iterator & pos, const_iterator & first, const_iterator & last )  
             {
                 while ( first != last ) 
                  {
@@ -410,8 +411,25 @@ namespace ls {
                  }
             }
 
-            template < typename InItr >
-            iterator insert(const  const_iterator & pos, InItr first, InItr last )  
+            iterator insert( iterator & pos, iterator & first, iterator & last )  
+            {
+                while ( first != last ) 
+                 {
+                    insert(pos, (*first).data);
+                    ++first;
+                 }
+            }
+
+            iterator insert( const_iterator & pos, const_iterator & first, const_iterator & last )  
+            {
+                while ( first != last ) 
+                 {
+                    insert(pos, (*first).data);
+                    ++first;
+                 }
+            }
+
+            iterator insert( const_iterator & pos, iterator & first, iterator & last )  
             {
                 while ( first != last ) 
                  {
@@ -496,7 +514,7 @@ namespace ls {
 
                 while (first != last) // Itera pela lista até que o iterator first seja igual ao iterator last
                     {
-                        DNode * itr{first}; // Nó que vai ser apagado
+                        DNode * itr{&first}; // Nó que vai ser apagado
                         DNode * prev{(*itr).prev}; // Nó posterior ao itr
                         DNode * next{(*itr).next}; // Nó anterior ao itr
 
@@ -515,7 +533,7 @@ namespace ls {
 
             // [V] Operator Overload
 
-            bool operator== (const list& rhs) //Sobrecarga do operador == para verificar se duas listas são iguais 
+            bool operator== ( list& rhs) //Sobrecarga do operador == para verificar se duas listas são iguais 
             {
                 if(this->size() != rhs.size()) return false; // Se elas têm tamanhos diferentes, retorna falso
 
@@ -547,20 +565,21 @@ namespace ls {
                 return false; // Caso as listas tenham o mesmo tamanho e seus nós sejam iguais, retorna falso 
             }
 
-            list& operator=( const list& other ) 
+            list& operator=( list& other ) 
             {
-                m_head = new DNode();
-                m_tail = new DNode();
-                m_head->next = m_tail;
-                m_tail->prev = m_head;
-                m_size = 0;
+                this->m_head = new DNode();
+                this->m_tail = new DNode();
+                this->m_head->next = m_tail;
+                this->m_tail->prev = m_head;
+                this->m_size = 0;
                 
                 this->clear();
 
                 auto itr = other.begin();
+
                 while ( itr != other.end()) 
                   {
-                    push_back((*itr).data);
+                    this->push_back((*itr).data);
                     ++itr;
                   }
 
@@ -569,21 +588,28 @@ namespace ls {
 
             list& operator=(const std::initializer_list<T> & ilist ) 
             {
-                m_head = new DNode();
-                m_tail = new DNode();
-                m_head->next = m_tail;
-                m_tail->prev = m_head;
-                m_size = 0;
+                this->m_head = new DNode();
+                this->m_tail = new DNode();
+                this->m_head->next = this->m_tail;
+                this->m_tail->prev = this->m_head;
+                this->m_size = 0;
                 
                 this->clear();
 
                 auto itr = ilist.begin();
 
                 while ( itr != ilist.end()) {
-                    push_back(*itr);
+                    this->push_back(*itr);
                     ++itr;
                 }
             }
+
+        // [VI] Print
+
+        void print () 
+        {
+
+        }
 
 
 
